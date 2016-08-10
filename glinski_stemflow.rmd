@@ -1,0 +1,62 @@
+---
+title: "glinski_stemflow"
+output: html_document
+---
+tested hypotheses
+============
+list
+
+things to do
+============
+list
+
+general configuration
+=====================
+Install and load supporting libraries.
+```{r eval=TRUE, echo=FALSE}
+print(Sys.info()[4])
+
+R.Version()$version.string
+library(rmarkdown, quietly = TRUE, warn.conflicts = FALSE)
+library(dplyr, quietly = TRUE, warn.conflicts = FALSE)
+library(knitr, quietly = TRUE, warn.conflicts = FALSE)
+library(ggplot2)
+print("list of loaded packages: ")
+print((.packages()))
+```
+
+import experimental exposure and dehydration data
+=================================
+Load csv file with experimental dehydration data. The below may return false but still be OK if rstudio does not have privileges to data directory (e.g., attached drive).
+
+```{r eval=TRUE, echo=FALSE}
+if(Sys.info()[4]=="DONNA-PC"){
+  stemflow.root <- path.expand("C:/Users/Donna/Documents/Github/glinski_stemflow/")
+}
+
+if(Sys.info()[4]=="stp-air-3.local" || Sys.info()[4]=="stp-air.local" || Sys.info()[4]=="stp-air"){
+  stemflow.root <- path.expand("~/git/glinski_stemflow/")
+}
+
+if(Sys.info()[4]=="DZ2626UTPURUCKE"){
+  stemflow.root <- "k:/git/glinski_stemflow/"
+}
+print(paste("Root directory location: ", stemflow.root, sep=""))
+
+stemflow.csv.in <- paste(stemflow.root, "csv_in/", sep="")
+stemflow.csv.out <- paste(stemflow.root, "csv_out/", sep="")
+stemflow.graphics <- paste(stemflow.root, "graphics/", sep="")
+stemflow.tables <- paste(stemflow.root, "tables/", sep="")
+
+#maybe ok even if remote drive returns false
+print(paste("check to see if R can access files OK: ", file.exists(stemflow.csv.in), sep = ""))
+
+#import tifton data
+tifton <- read.table(paste(stemflow.csv.in,"tifton2015.csv",sep=""), header = TRUE, sep = ",")
+#View(tifton)
+```
+
+tifton data structure
+====================================
+Check out structure of imported data sets. 
+
