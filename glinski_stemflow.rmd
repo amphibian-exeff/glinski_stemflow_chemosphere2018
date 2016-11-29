@@ -4,11 +4,20 @@ output: html_document
 ---
 tested hypotheses
 ============
-list
+Test to see whether field observations of stemflow concentrations are greater that forest throughfall concentrations (or vice-versa). Samples are paired across 3 locations and 18 different sampling dates. Therefore 54 observations for each of 32 chemicals. However, many samples are non-detected.
+
+Non-parametric Wilcoxon Rank Sum test implemented. Permutation tests also possible. Test requiring distribution assumptions (e.g., t-test) not practical due to non-detects and data skewness.
+
+This page is published at: http://rpubs.com/puruckertom/glinski_stemflow
 
 things to do
 ============
-list
+- implement permutation tests
+- test all 32 chemicals at once rather than one at a time
+- effects estimation approaches
+- signs versus time
+- signs versus rainfall (need cumulative rainfall)
+- signs versus volume
 
 general configuration
 =====================
@@ -60,3 +69,219 @@ tifton data structure
 ====================================
 Check out structure of imported data sets. 
 
+```{r eval=TRUE, echo=TRUE}
+summary(tifton)
+colnames(tifton)
+chems <- unique(tifton$Compound)
+chems
+media <- unique(tifton$Type)
+media
+#coerce concentrations to numeric because NAs
+tifton$Conc <- as.numeric(tifton$Conc)
+min(tifton$Conc,na.rm=TRUE)
+max(tifton$Conc,na.rm=TRUE)
+```
+
+wilcox stat testing
+====================================
+Run Wilcoxon rank sum test on throughfall versus stemflow for each individual chemical that has detected values. There are three different commands in R that calculate
+the Wilcoxon signed-rank test; wilcox.test, wilcox.exact, and
+wilcoxsign_test. They will each yield a different  p-value.
+
+The nonparametric Wilcoxon signed-rank test seems to be the most
+appropriate test for these data. There are two different methods to
+calculate the signed-rank test. The first is by Wilcoxon (1945), who
+discards any tied data and then calculates the signed ranks. The second
+method incorporates tied values in the ranking procedure (see J.W. Pratt,
+1959, Remarks on zeros and ties in the Wilcoxon signed rank procedure:
+Journal of the American Statistical Association, Vol. 54, No. 287, pp.
+655-667). There are two commands in R that calculate the original method
+by Wilcoxon, wilcox.test and wilcoxsign_test (make sure
+to include the argument "zero.method = c("Wilcoxon")"). There are two
+other commands in R that incorporate ties in the signed-rank test,
+wilcox.exact and wilcoxsign_test (make sure to include the
+argument"zero.method = c("Pratt")").
+
+1. wilcox.test() in the stats package
+This function automatically switches to using a Normal
+approximation when there are ties in the data:
+
+wilcox.test(x, y, paired=TRUE)$p.value
+
+(You can suppress the warning (due to ties) by specifying
+the argument 'exact=FALSE'.)
+
+This function also uses a continuity correction unless
+told not to:
+
+wilcox.test(x, y, paired=TRUE, correct=FALSE)$p.value
+
+2. wilcox.exact() in pkg exactRankTests
+This function can handle ties (using the "Wilcoxon" method)
+with an 'exact' calculation:
+
+wilcox.exact(x, y, paired=TRUE)$p.value
+
+If we want the Normal approximation:
+
+wilcox.exact(x, y, paired=TRUE, exact=FALSE)$p.value
+
+3. wilcoxsign_test() in pkg coin
+This is the most comprehensive of these functions.
+It is also the only one that offers the "Pratt" method
+of handling ties. It will default to this method and
+a Normal approximation:
+
+pvalue(wilcoxsign_test(x ~ y))
+
+pvalue(wilcoxsign_test(x ~ y, zero.method="Pratt",
+         distribution="asympt"))
+
+You can get the results from wilcox.exact() with
+
+  pvalue(wilcoxsign_test(x ~ y, zero.method="Wilcoxon",
+         distribution="asympt"))
+
+and
+
+  pvalue(wilcoxsign_test(x ~ y, zero.method="Wilcoxon",
+         dist="exact"))
+
+For the moment we are using wilcox.test with ties (paired = TRUE, alternative = 'greater', exact = FALSE) but the test is not being
+run unless there are at least 4 detected values for a chemical.
+
+
+chemical level analyses
+====================================
+```{r eval=TRUE, echo=TRUE}
+for(chem in chems){
+  print('=======================================================')
+  print(chem)
+  chem_data <- tifton[which(tifton$Compound==chem),]
+  chem_sf <- chem_data[which(chem_data$Type=='SF'),]
+  chem_tf <- chem_data[which(chem_data$Type=='TF'),]
+  #merge on site, date, compound
+  chem_merge <- merge(chem_sf,chem_tf,by=c("Compound","Site","Date"))
+  #conc.x is sf; conc.y is tf
+  #we want to test if stemflow is greater than throughfall (x > y)
+  x_nas <- sum(is.na(chem_merge$Conc.x))
+  y_nas <- sum(is.na(chem_merge$Conc.y))
+  x_n <- length(is.na(chem_merge$Conc.x))
+  y_n <- length(is.na(chem_merge$Conc.y))
+  x_dets <- x_n - x_nas
+  y_dets <- y_n - y_nas
+  if(x_dets>0){
+    if(x_nas==0){
+      x_min <- min(chem_merge$Conc.x,na.rm=TRUE)
+    }else{
+      x_min=0
+    }
+    x_max <- max(chem_merge$Conc.x,na.rm=TRUE)
+  }else{
+    x_min <- 0
+    x_max <- 0
+  }
+  if(y_dets>0){
+    if(y_nas==0){
+      y_min <- min(chem_merge$Conc.y,na.rm=TRUE)
+    }else{
+      y_min=0
+    }
+    y_max <- max(chem_merge$Conc.y,na.rm=TRUE)
+  }else{
+    y_min <- 0
+    y_max <- 0
+  }
+  #colnames(chem_merge)
+  print(paste(chem,'stemflow detection frequency = ',x_dets,'/',x_n))
+  print(paste(chem,'stemflow concentration range =(',x_min,',',x_max,')'))
+  print(paste(chem,'throughfall detection frequency = ',y_dets,'/',y_n))
+  print(paste(chem,'throughfall concentration range =(',y_min,',',y_max,')'))
+  
+  #change NAs to zeroes for conparisons and the Wilcox test
+  chem_merge$Conc.x[is.na(chem_merge$Conc.x)] <- 0
+  chem_merge$Conc.y[is.na(chem_merge$Conc.y)] <- 0
+  n_comparisons <- length(chem_merge$Conc.x)
+  n_tf_greater <- sum(chem_merge$Conc.y > chem_merge$Conc.x)
+  n_ties <- sum(chem_merge$Conc.y == chem_merge$Conc.x)
+  n_sf_greater <- sum(chem_merge$Conc.x > chem_merge$Conc.y)
+  comparisons <- paste('(throughfall_greater, ties, stemflow_greater) = ('
+              ,n_tf_greater,',',n_ties,',',n_sf_greater,')')
+  print(comparisons)
+  
+  if((x_dets+y_dets)>4){
+    print(knitr::kable(chem_merge))
+    chem_wilcox <- wilcox.test(chem_merge$Conc.x, chem_merge$Conc.y, 
+                               alternative = 'less', paired = TRUE, exact = FALSE)
+    max_conc <- max(x_max,y_max)
+    max_conc_vector <- seq(0,max_conc,20)
+    print(chem_wilcox)
+    plot(chem_merge$Conc.x, chem_merge$Conc.y,xlim=c(0,max_conc),ylim=c(0,max_conc),
+         xlab='Stemflow Concentration',ylab='Throughfall Concentration',
+         main=paste(chem,'(WRS p-value = ',round(chem_wilcox$p.value,4),')'),
+         sub = comparisons)
+    abline(0,1,col='red')
+  }else{
+    print(paste(chem,'does not have enough detected values for wilcox test'))
+  }
+}
+```
+
+global analyses
+====================================
+Two values with high concentrations are not shown on the all tifton data figure.
+
+```{r eval=TRUE, echo=TRUE}
+print('=======================================================')
+print('global')
+tifton_sf <- tifton[which(tifton$Type=='SF'),]
+tifton_tf <- tifton[which(tifton$Type=='TF'),]
+#merge on site, date, compound
+tifton_merge <- merge(tifton_sf,tifton_tf,by=c("Compound","Site","Date"))
+#change NAs to zeroes for conparisons and the Wilcox test
+tifton_merge$Conc.x[is.na(tifton_merge$Conc.x)] <- 0
+tifton_merge$Conc.y[is.na(tifton_merge$Conc.y)] <- 0
+n_tf_greater <- sum(tifton_merge$Conc.y > tifton_merge$Conc.x)
+n_ties <- sum(tifton_merge$Conc.y == tifton_merge$Conc.x)
+n_sf_greater <- sum(tifton_merge$Conc.x > tifton_merge$Conc.y)
+comparisons <- paste('(throughfall_greater, ties, stemflow_greater) = ('
+            ,n_tf_greater,',',n_ties,',',n_sf_greater,')')
+print(comparisons)
+
+tifton_wilcox <- wilcox.test(tifton_merge$Conc.x, tifton_merge$Conc.y, 
+                               alternative = 'less', paired = TRUE, exact = FALSE)
+x_max <- max(tifton_merge$Conc.x)
+y_max <- max(tifton_merge$Conc.y)
+max_conc <- max(x_max,y_max)
+max_conc_vector <- seq(0,max_conc,20)
+print(tifton_wilcox)
+plot(tifton_merge$Conc.x, tifton_merge$Conc.y, 
+    xlim=c(0,4),ylim=c(0,4),
+    xlab='Stemflow Concentration',ylab='Throughfall Concentration',
+    main=paste('All Tifton Data (WRS p-value = ',round(tifton_wilcox$p.value,4),')'),
+    sub = comparisons)
+abline(0,1,col='red')
+```
+
+permutation stat testing
+====================================
+
+For many of the chemicals, some/most observations have identical/not detected values, hence the warning message thrown by R: unique ranks cannot be computed for all observations in the Wilcox test. Since there are ties, this prevents the computation of an exact p-value. With high numbers of tied data, Wilcoxon tests are not trustworthy. Moreover, in most non-parametric tests we assume that the sampled populations are symmetric and have the same dispersion or shape, which is not verifiable here.
+
+A permutation test may be more appropriate in this case, for example permTS (perm), pperm (exactRankTests), or the coin package. Although these approaches do not take advantage of the paired design.
+
+```{r eval=TRUE, echo=TRUE}
+
+```
+
+results
+====================================
+Mixed bag at the moment. Overall inference on paired data shows that throughfall concentrations exceed stemflow concentration 170 times versus 92 of the opposite exceedance. This corresponds to a p-value of 0.0019 with the Wilcoxon Rank Sum test. 
+
+There will be complaints from reviewers about the unequal volumes of samples for the two media, we need to be clear that the collection time is the same for these paired comparisons.
+
+I guess we can also break out how often the exceedances are a detect versus a non-detect as opposed to a detect versus detect comparison. Can we assume that the actual detection limit is lower for the higher volume stemflow samples? (meaning that the volumes may bias the analyses towards stemflow exceedances and not throughfall).
+
+Stemflow concentrations probably plagued by dilution versus first flush issues. We may want to think about how to use sample volume or observed rainfall totals for these dates to look at this and separate small from large rain events.
+
+Having detection limits will help us characterize the magnitude of the difference between stemflow and throughfall (for example, ratio calculations that are not possible by treating non-detects as zeroes).
