@@ -263,6 +263,17 @@ plot(tifton_merge$Conc.x, tifton_merge$Conc.y,
 abline(0,1,col='red')
 ```
 
+regressing versus rainfall amounts
+====================================
+We want to look at how the amount of rainfall influences the concentrations in stemflow and throughfall, in
+```{r eval=TRUE, echo=TRUE}
+print('=======================================================')
+print('global')
+
+
+```
+
+
 permutation stat testing
 ====================================
 
