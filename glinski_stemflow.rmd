@@ -12,12 +12,17 @@ This page is published at: http://rpubs.com/puruckertom/glinski_stemflow
 
 things to do
 ============
-- implement permutation tests
-- test all 32 chemicals at once rather than one at a time
-- effects estimation approaches
+- wrs tests for stemflow greater than throughfall by date
+- wrs tests for stemflow greater than throughfall by site (metolachlor) 
 - signs versus time
 - signs versus rainfall (need cumulative rainfall)
-- signs versus volume
+- a single plot stacked concentration versus time for all sites (all 10 tifton pond sites)
+- a single plot concentration versus time plots for stemflow and throughfall by site, 6 different symbol/color/filled)
+- signs versus volume(s)
+- implement permutation tests
+- test all 32 chemicals at once rather than one at a time (done)
+- effects estimation approaches
+
 
 general configuration
 =====================
@@ -63,11 +68,15 @@ print(paste("check to see if R can access files OK: ", file.exists(stemflow.csv.
 #import tifton data
 tifton <- read.table(paste(stemflow.csv.in,"tifton2015.csv",sep=""), header = TRUE, sep = ",")
 #View(tifton)
+
+#import tifton data
+rainwater <- read.table(paste(stemflow.csv.in,"rainwater_amount.csv",sep=""), header = TRUE, sep = ",")
+
 ```
 
 tifton data structure
 ====================================
-Check out structure of imported data sets. 
+Check out structure of imported data sets. sf v tf (32 chemicals, 3 paired sites, 52 storm events), pondwater (10 samples * 12 months)
 
 ```{r eval=TRUE, echo=TRUE}
 summary(tifton)
@@ -80,6 +89,11 @@ media
 tifton$Conc <- as.numeric(tifton$Conc)
 min(tifton$Conc,na.rm=TRUE)
 max(tifton$Conc,na.rm=TRUE)
+
+colnames(rainwater)
+colnames(rainwater)[1] <- 'Date'
+
+summary(rainwater)
 ```
 
 wilcox stat testing
@@ -154,14 +168,24 @@ run unless there are at least 4 detected values for a chemical.
 chemical level analyses
 ====================================
 ```{r eval=TRUE, echo=TRUE}
-for(chem in chems){
+chems_we_care_about <- c('Metolachlor', 'Tebuconazole', '2-Phenylphenol', 'Atrazine', 'Biphenyl', 'DEA', 'Flutolanil')
+for(chem in chems_we_care_about){
   print('=======================================================')
   print(chem)
   chem_data <- tifton[which(tifton$Compound==chem),]
   chem_sf <- chem_data[which(chem_data$Type=='SF'),]
   chem_tf <- chem_data[which(chem_data$Type=='TF'),]
+  chem_tp <- chem_data[which(chem_data$Type=='TP'),]
   #merge on site, date, compound
   chem_merge <- merge(chem_sf,chem_tf,by=c("Compound","Site","Date"))
+  chem_merge <- merge(chem_merge, rainwater, by="Date")
+  #1 plot by rainfall (metolachlor and tebuconazole)
+  plot(chem_merge$amount_inches, chem_merge$Conc.x, main='stemflow')
+  #1 plot by date (all together, with 3 different symbols/colors for site and filled/not filled for sf v tf)
+  plot(chem_merge$Date, chem_merge$Conc.y, title='throughfall')
+  plot(chem_merge$Date, chem_merge$Conc.x, main='stemflow')
+  #1 stacked barplots by month for all sites for tifton ponds
+  
   #conc.x is sf; conc.y is tf
   #we want to test if stemflow is greater than throughfall (x > y)
   x_nas <- sum(is.na(chem_merge$Conc.x))
@@ -192,6 +216,7 @@ for(chem in chems){
     y_min <- 0
     y_max <- 0
   }
+  ### statistical analysis where all 3 locations are grouped
   #colnames(chem_merge)
   print(paste(chem,'stemflow detection frequency = ',x_dets,'/',x_n))
   print(paste(chem,'stemflow concentration range =(',x_min,',',x_max,')'))
@@ -209,10 +234,11 @@ for(chem in chems){
               ,n_tf_greater,',',n_ties,',',n_sf_greater,')')
   print(comparisons)
   
+  #do the test for all sites
   if((x_dets+y_dets)>4){
     print(knitr::kable(chem_merge))
     chem_wilcox <- wilcox.test(chem_merge$Conc.x, chem_merge$Conc.y, 
-                               alternative = 'less', paired = TRUE, exact = FALSE)
+                               alternative = 'greater', paired = TRUE, exact = FALSE)
     max_conc <- max(x_max,y_max)
     max_conc_vector <- seq(0,max_conc,20)
     print(chem_wilcox)
@@ -224,6 +250,8 @@ for(chem in chems){
   }else{
     print(paste(chem,'does not have enough detected values for wilcox test'))
   }
+  ### statistical analysis for each location, not grouped
+  #do the test for each sites
 }
 ```
 
@@ -238,7 +266,7 @@ tifton_sf <- tifton[which(tifton$Type=='SF'),]
 tifton_tf <- tifton[which(tifton$Type=='TF'),]
 #merge on site, date, compound
 tifton_merge <- merge(tifton_sf,tifton_tf,by=c("Compound","Site","Date"))
-#change NAs to zeroes for conparisons and the Wilcox test
+#change NAs to zeroes for comparisons and the Wilcox test
 tifton_merge$Conc.x[is.na(tifton_merge$Conc.x)] <- 0
 tifton_merge$Conc.y[is.na(tifton_merge$Conc.y)] <- 0
 n_tf_greater <- sum(tifton_merge$Conc.y > tifton_merge$Conc.x)
@@ -249,7 +277,7 @@ comparisons <- paste('(throughfall_greater, ties, stemflow_greater) = ('
 print(comparisons)
 
 tifton_wilcox <- wilcox.test(tifton_merge$Conc.x, tifton_merge$Conc.y, 
-                               alternative = 'less', paired = TRUE, exact = FALSE)
+                               alternative = 'greater', paired = TRUE, exact = FALSE)
 x_max <- max(tifton_merge$Conc.x)
 y_max <- max(tifton_merge$Conc.y)
 max_conc <- max(x_max,y_max)
