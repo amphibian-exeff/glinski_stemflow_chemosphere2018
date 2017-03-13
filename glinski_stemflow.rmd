@@ -10,14 +10,19 @@ Non-parametric Wilcoxon Rank Sum test implemented. Permutation tests also possib
 
 This page is published at: http://rpubs.com/puruckertom/glinski_stemflow
 
-things to do
+figures needed
+============
+- a single plot stacked surface water concentration versus time for all sites (all 10 tifton pond sites- metolachlor, tebuconazole) figure 3 redone
+- figure 4 stacked clustered surface water (4L samples) by site*month (Ponds_4L.csv)
+- a single plot concentration versus time plots for stemflow and throughfall by site, 6 different symbol/color/filled) figure 5 redone (metolachlor, tebuconazole))
+- figure 6 as jpg (add units to x and y - ug/L)
+- signs versus time plot to support wrs tests
+- signs versus rainfall intensity (cumulative rainfall) to support wrs tests
+
+possible additional things to do
 ============
 - wrs tests for stemflow greater than throughfall by date
 - wrs tests for stemflow greater than throughfall by site (metolachlor) 
-- signs versus time
-- signs versus rainfall (need cumulative rainfall)
-- a single plot stacked concentration versus time for all sites (all 10 tifton pond sites)
-- a single plot concentration versus time plots for stemflow and throughfall by site, 6 different symbol/color/filled)
 - signs versus volume(s)
 - implement permutation tests
 - test all 32 chemicals at once rather than one at a time (done)
