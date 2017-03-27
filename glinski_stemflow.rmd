@@ -8,14 +8,15 @@ Test to see whether field observations of stemflow concentrations are greater th
 
 Non-parametric Wilcoxon Rank Sum test implemented. Permutation tests also possible. Test requiring distribution assumptions (e.g., t-test) not practical due to non-detects and data skewness.
 
-This page is published at: http://rpubs.com/puruckertom/glinski_stemflow
+This page is published at: http://rpubs.com/puruckertom/glinski_stemflow2
 
 figures needed
 ============
+- scatterplot of stemflow concentration versus throughfall concentrations (fig #6)
+- figure 6 as jpg (add units to x and y - ug/L)
 - a single plot stacked surface water concentration versus time for all sites (all 10 tifton pond sites- metolachlor, tebuconazole) figure 3 redone
 - figure 4 stacked clustered surface water (4L samples) by site*month (Ponds_4L.csv)
 - a single plot concentration versus time plots for stemflow and throughfall by site, 6 different symbol/color/filled) figure 5 redone (metolachlor, tebuconazole))
-- figure 6 as jpg (add units to x and y - ug/L)
 - signs versus time plot to support wrs tests
 - signs versus rainfall intensity (cumulative rainfall) to support wrs tests
 
@@ -77,6 +78,7 @@ tifton <- read.table(paste(stemflow.csv.in,"tifton2015.csv",sep=""), header = TR
 #import tifton data
 rainwater <- read.table(paste(stemflow.csv.in,"rainwater_amount.csv",sep=""), header = TRUE, sep = ",")
 
+
 ```
 
 tifton data structure
@@ -99,6 +101,7 @@ colnames(rainwater)
 colnames(rainwater)[1] <- 'Date'
 
 summary(rainwater)
+#chem_merge <- merge(chem_merge, rainwater, by="Date")
 ```
 
 wilcox stat testing
@@ -185,9 +188,9 @@ for(chem in chems_we_care_about){
   chem_merge <- merge(chem_sf,chem_tf,by=c("Compound","Site","Date"))
   chem_merge <- merge(chem_merge, rainwater, by="Date")
   #1 plot by rainfall (metolachlor and tebuconazole)
-  plot(chem_merge$amount_inches, chem_merge$Conc.x, main='stemflow')
+  plot(chem_merge$amount_inches, chem_merge$Conc.x, main=paste(chem,'stemflow'))
   #1 plot by date (all together, with 3 different symbols/colors for site and filled/not filled for sf v tf)
-  plot(chem_merge$Date, chem_merge$Conc.y, title='throughfall')
+  plot(chem_merge$Date, chem_merge$Conc.y, title=paste(chem,'throughfall'))
   plot(chem_merge$Date, chem_merge$Conc.x, main='stemflow')
   #1 stacked barplots by month for all sites for tifton ponds
   
@@ -260,6 +263,8 @@ for(chem in chems_we_care_about){
 }
 ```
 
+
+  
 global analyses
 ====================================
 Two values with high concentrations are not shown on the all tifton data figure.
@@ -281,8 +286,8 @@ comparisons <- paste('(throughfall_greater, ties, stemflow_greater) = ('
             ,n_tf_greater,',',n_ties,',',n_sf_greater,')')
 print(comparisons)
 
-tifton_wilcox <- wilcox.test(tifton_merge$Conc.x, tifton_merge$Conc.y, 
-                               alternative = 'greater', paired = TRUE, exact = FALSE)
+tifton_wilcox <- wilcox.test(tifton_merge$Conc.y, tifton_merge$Conc.x, 
+                               alternative = 'two.sided', paired = TRUE, exact = FALSE)
 x_max <- max(tifton_merge$Conc.x)
 y_max <- max(tifton_merge$Conc.y)
 max_conc <- max(x_max,y_max)
@@ -295,6 +300,46 @@ plot(tifton_merge$Conc.x, tifton_merge$Conc.y,
     sub = comparisons)
 abline(0,1,col='red')
 ```
+
+date analyses
+====================================
+```{r eval=TRUE, echo=TRUE}
+#break down by day
+#rainwater
+View(rainwater)
+#tifton[which(tifton$Compound==chem),]
+tifton_sf <- tifton[which(tifton$Type=='SF'),]
+dim(tifton_sf)
+tifton_tf <- tifton[which(tifton$Type=='TF'),]
+dim(tifton_tf)
+tifton_tp <- tifton[which(tifton$Type=='TP'),]
+
+#merge on site, date, compound
+tifton_merge <- merge(tifton_sf,tifton_tf,by=c("Compound","Site","Date"))
+dim(tifton_merge)
+tifton_merge <- merge(tifton_merge, rainwater, by="Date")
+dim(tifton_merge)
+unique_dates <- unique(tifton_merge$Date)
+
+for(date in unique_dates){
+  tifton_merge_date <- tifton_merge[which(tifton$Date==date),]
+  #change NAs to zeroes for comparisons and the Wilcox test
+  tifton_merge_date$Conc.x[is.na(tifton_merge_date$Conc.x)] <- 0
+  tifton_merge_date$Conc.y[is.na(tifton_merge_date$Conc.y)] <- 0
+  print(date)
+  #print(tifton_merge_date)
+  n_tf_greater <- sum(tifton_merge_date$Conc.y > tifton_merge_date$Conc.x)
+  n_ties <- sum(tifton_merge_date$Conc.y == tifton_merge_date$Conc.x)
+  n_sf_greater <- sum(tifton_merge_date$Conc.x > tifton_merge_date$Conc.y)
+  comparisons <- paste(date,'(throughfall_greater, ties, stemflow_greater) = ('
+              ,n_tf_greater,',',n_ties,',',n_sf_greater,')')
+  print(comparisons)
+  
+}
+
+  
+```
+
 
 regressing versus rainfall amounts
 ====================================
