@@ -12,10 +12,17 @@ This page is published at: http://rpubs.com/puruckertom/glinski_stemflow2
 
 figures needed
 ============
+
+done:
+
 - scatterplot of stemflow concentration versus throughfall concentrations (fig #6)
 - figure 6 as jpg (add units to x and y - ug/L)
+
+still needed:
+
 - a single plot stacked surface water concentration versus time for all sites (all 10 tifton pond sites- metolachlor, tebuconazole) figure 3 redone
 - figure 4 stacked clustered surface water (4L samples) by site*month (Ponds_4L.csv)
+- figure 5 is stemflow and throughfall for tebuconazole and metolachlor (3 sites each), time series (like figure 3)
 - a single plot concentration versus time plots for stemflow and throughfall by site, 6 different symbol/color/filled) figure 5 redone (metolachlor, tebuconazole))
 - signs versus time plot to support wrs tests
 - signs versus rainfall intensity (cumulative rainfall) to support wrs tests
@@ -101,6 +108,7 @@ colnames(rainwater)
 colnames(rainwater)[1] <- 'Date'
 
 summary(rainwater)
+unique(rainwater$Date)
 #chem_merge <- merge(chem_merge, rainwater, by="Date")
 ```
 
