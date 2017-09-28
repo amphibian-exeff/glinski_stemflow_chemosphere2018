@@ -71,13 +71,18 @@ flag_tp_tebuconazole <- which(tifton$Compound=="Tebuconazole" & tifton$Type == "
 metolachlor_dates <- tifton[flag_tp_metolachlor,]$Date
 metolachlor_sites <- tifton[flag_tp_metolachlor,]$Site
 metolachlor_concs <- tifton[flag_tp_metolachlor,]$Conc
+metolachlor_nds <- which(is.na(metolachlor_concs))
 metolachlor_concs[is.na(metolachlor_concs)] <- 0
 metolachlor_df <- data.frame(metolachlor_dates, metolachlor_sites, metolachlor_concs)
 metolachlor_df$metolachlor_dates <- factor(metolachlor_df$metolachlor_dates, 
                                            levels = unique(metolachlor_df$metolachlor_dates))
-sorted_metolachlor_df <- metolachlor_df[order(unique(metolachlor_df$metolachlor_dates)),]
+metolachlor_df_nds <- metolachlor_df[-metolachlor_nds,]
+sorted_metolachlor_df_nds <- metolachlor_df_nds[order(metolachlor_df_nds$metolachlor_dates),]
+dim(sorted_metolachlor_df_nds)
+sorted_metolachlor_df <- metolachlor_df[order(metolachlor_df$metolachlor_dates),]
+dim(sorted_metolachlor_df)
 #sort data.frame on date in chron order
-unique(metolachlor_dates)
+#unique(metolachlor_dates)
 
 metolachlor_stacked <- ggplot(data=metolachlor_df, aes(x=metolachlor_dates, y=metolachlor_concs, fill=metolachlor_sites)) +
   geom_bar(stat="identity") +
@@ -89,15 +94,25 @@ metolachlor_boxplot <- ggplot(data=metolachlor_df, aes(x=metolachlor_dates, y=me
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+metolachlor_boxplot_nds <- ggplot(data=metolachlor_df_nds, aes(x=metolachlor_dates, y=metolachlor_concs, fill=metolachlor_sites)) +
+  geom_boxplot(fill='cornflowerblue') +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
 #build tebuconazole data.frame
 tebuconazole_dates <- tifton[flag_tp_tebuconazole,]$Date
 tebuconazole_sites <- tifton[flag_tp_tebuconazole,]$Site
 tebuconazole_concs <- tifton[flag_tp_tebuconazole,]$Conc
+tebuconazole_nds <- which(is.na(tebuconazole_concs))
 tebuconazole_concs[is.na(tebuconazole_concs)] <- 0
 tebuconazole_df <- data.frame(tebuconazole_dates, tebuconazole_sites, tebuconazole_concs)
 tebuconazole_df$tebuconazole_dates <- factor(tebuconazole_df$tebuconazole_dates, 
                                            levels = unique(tebuconazole_df$tebuconazole_dates))
-sorted_tebuconazole_df <- tebuconazole_df[order(unique(tebuconazole_df$tebuconazole_dates)),]
+tebuconazole_df_nds <- tebuconazole_df[-tebuconazole_nds,]
+sorted_tebuconazole_df_nds <- tebuconazole_df_nds[order(tebuconazole_df_nds$tebuconazole_dates),]
+dim(sorted_tebuconazole_df_nds)
+sorted_tebuconazole_df <- tebuconazole_df[order(tebuconazole_df$tebuconazole_dates),]
+dim(sorted_tebuconazole_df)
 
 #sort data.frame on date in chron order
 unique(tebuconazole_dates)  
@@ -111,13 +126,30 @@ tebuconazole_boxplot <- ggplot(data=tebuconazole_df, aes(x=tebuconazole_dates, y
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
+tebuconazole_boxplot_nds <- ggplot(data=tebuconazole_df_nds, aes(x=tebuconazole_dates, y=tebuconazole_concs, fill=tebuconazole_sites)) +
+  geom_boxplot(fill='cornflowerblue') +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
 compare_boxplot <- paste(stemflow.graphics,"met_teb_boxplot.png",sep="")
-#multiplot(metolachlor_boxplot, tebuconazole_boxplot, cols=1)
+png(compare_boxplot, width = 4, height = 6, units = "in",res=300)
+multiplot(metolachlor_boxplot, tebuconazole_boxplot, cols=1)
+dev.off()
 #arrangeGrob(metolachlor_boxplot, tebuconazole_boxplot, ncol = 1)
-ggarrange(metolachlor_boxplot, tebuconazole_boxplot,labels=c("A","B"),ncol=1,nrows=2)
-ggsave(compare_boxplot,device="png",width=6,height=4)
+#ggarrange(metolachlor_boxplot, tebuconazole_boxplot,labels=c("A","B"),ncol=1,nrows=2)
+#ggsave(compare_boxplot,device="png",width=6,height=4)
+
+compare_boxplot_nds <- paste(stemflow.graphics,"met_teb_boxplot_nds.png",sep="")
+png(compare_boxplot_nds, width = 4, height = 6, units = "in",res=300)
+multiplot(metolachlor_boxplot_nds, tebuconazole_boxplot_nds, cols=1)
+dev.off()
+#arrangeGrob(metolachlor_boxplot, tebuconazole_boxplot, ncol = 1)
+#ggarrange(metolachlor_boxplot, tebuconazole_boxplot,labels=c("A","B"),ncol=1,nrows=2)
+#ggsave(compare_boxplot_nds,device="png",width=6,height=4)
 
 compare_stacked <- paste(stemflow.graphics,"met_teb_stacked.png",sep="")
-#multiplot(metolachlor_stacked, tebuconazole_stacked, cols=1)
-ggarrange(metolachlor_stacked, tebuconazole_stacked,labels=c("A","B"),ncol=1,nrows=2)
-ggsave(compare_stacked,device="png",width=6,height=4)
+png(compare_stacked, width = 4, height = 6, units = "in",res=300)
+multiplot(metolachlor_stacked, tebuconazole_stacked, cols=1)
+dev.off()
+#ggarrange(metolachlor_stacked, tebuconazole_stacked,labels=c("A","B"),ncol=1,nrows=2)
+#ggsave(compare_stacked,device="png",width=6,height=4)
