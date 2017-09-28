@@ -117,8 +117,11 @@ dim(sorted_tebuconazole_df)
 #sort data.frame on date in chron order
 unique(tebuconazole_dates)  
 tebuconazole_stacked <- ggplot(data=tebuconazole_df, aes(x=tebuconazole_dates, y=tebuconazole_concs, fill=tebuconazole_sites)) +
-  geom_bar(stat="identity") +
+  geom_bar(stat="identity", position="stack") +
+  scale_fill_grey(start=0.2,end=0.8) +
+  scale_fill_brewer(palette = "Set3") + 
   theme_bw() + 
+  labs(x = "Sample Date", y="Concentration (ug/L)") +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 tebuconazole_boxplot <- ggplot(data=tebuconazole_df, aes(x=tebuconazole_dates, y=tebuconazole_concs, fill=tebuconazole_sites)) +
@@ -148,7 +151,7 @@ dev.off()
 #ggsave(compare_boxplot_nds,device="png",width=6,height=4)
 
 compare_stacked <- paste(stemflow.graphics,"glinski_fig3_met_teb_stacked.png",sep="")
-png(compare_stacked, width = 4, height = 6, units = "in",res=300)
+png(compare_stacked, width = 6, height = 6, units = "in",res=300)
 multiplot(metolachlor_stacked, tebuconazole_stacked, cols=1)
 dev.off()
 #ggarrange(metolachlor_stacked, tebuconazole_stacked,labels=c("A","B"),ncol=1,nrows=2)
