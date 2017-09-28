@@ -147,7 +147,7 @@ dev.off()
 #ggarrange(metolachlor_boxplot, tebuconazole_boxplot,labels=c("A","B"),ncol=1,nrows=2)
 #ggsave(compare_boxplot_nds,device="png",width=6,height=4)
 
-compare_stacked <- paste(stemflow.graphics,"met_teb_stacked.png",sep="")
+compare_stacked <- paste(stemflow.graphics,"glinski_fig3_met_teb_stacked.png",sep="")
 png(compare_stacked, width = 4, height = 6, units = "in",res=300)
 multiplot(metolachlor_stacked, tebuconazole_stacked, cols=1)
 dev.off()
