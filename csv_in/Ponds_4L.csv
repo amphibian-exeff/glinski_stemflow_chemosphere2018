@@ -2,7 +2,7 @@ Month,Site,Metolachlor,Other Pesticides
 February,4,0.08,0.125
 February,5,0.1,0.135
 February,8,0.195,0.2325
-March,4,0.1025,0
+March,4,0.1025,NA
 March,5,0.175,0.0775
 March,8,0.1425,0.0725
 April,4,0.24,0.2125
@@ -16,7 +16,7 @@ June,5,1.1975,1.5675
 June,8,0.8725,2.2125
 July,4,1.245,0.7275
 July,5,1.255,1.2
-July,8,NS,NS
+July,8,NA,NA
 August,4,0.26,0.4225
 August,5,2.635,0.8875
 August,8,2.2825,1.02
@@ -24,7 +24,7 @@ September,4,0.185,0.88
 September,5,1.4675,0.6275
 September,8,1.6025,0.6275
 October,4,0.57,0.2075
-October,5,0,0.45
+October,5,NA,0.45
 October,8,0.3875,0.4475
 November,4,0.2075,0.565
 November,5,0.3975,0.6625

@@ -121,7 +121,7 @@ tebuconazole_stacked <- ggplot(data=tebuconazole_df, aes(x=tebuconazole_dates, y
   scale_fill_grey(start=0.2,end=0.8) +
   scale_fill_brewer(palette = "Set3") + 
   theme_bw() + 
-  labs(x = "Sample Date", y="Concentration (ug/L)") +
+  labs(x = "Sample Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 tebuconazole_boxplot <- ggplot(data=tebuconazole_df, aes(x=tebuconazole_dates, y=tebuconazole_concs, fill=tebuconazole_sites)) +
