@@ -41,7 +41,7 @@ p <- ggplot(data=tifton_compounds_plot, aes(Date, Conc)) +
   labs(x = "Sample Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
-jpeg(paste(stemflow.graphics,"glinski_fig5.jpg", sep=""),width = 5, height = 6, units = "in",res=300)
+jpeg(paste(stemflow.graphics,"glinski_fig5.jpg", sep=""),width = 5, height = 6, units = "in",res=600)
   p
 dev.off()
 
