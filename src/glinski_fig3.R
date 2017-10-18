@@ -7,6 +7,7 @@ library(ggplot2)
 library(gridExtra)
 library(ggpubr)
 library(cowplot)
+library(RColorBrewer)
 
 # Multiple plot function
 #
@@ -84,15 +85,28 @@ dim(sorted_metolachlor_df)
 #sort data.frame on date in chron order
 #unique(metolachlor_dates)
 
+#sites as factor
+summary(metolachlor_df)
+metolachlor_df$metolachlor_sites <- factor(metolachlor_df$metolachlor_sites)
+
+# colfunc <- colorRampPalette(c("black", "gray89"))
+# colfunc <- colorRampPalette(c("blue4", "darkolivegreen1"))
+# fill_palette <- colfunc(10)
+fill_palette <- brewer.pal(10,"Spectral")
+
+
 metolachlor_stacked <- ggplot(data=metolachlor_df, aes(x=metolachlor_dates, y=metolachlor_concs, fill=metolachlor_sites)) +
   geom_bar(stat="identity") +
+  scale_fill_manual(values=fill_palette) +
   theme_bw() + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
-  
+metolachlor_stacked
+
 metolachlor_boxplot <- ggplot(data=metolachlor_df, aes(x=metolachlor_dates, y=metolachlor_concs, fill=metolachlor_sites)) +
   geom_boxplot(fill='cornflowerblue') +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+metolachlor_boxplot
 
 metolachlor_boxplot_nds <- ggplot(data=metolachlor_df_nds, aes(x=metolachlor_dates, y=metolachlor_concs, fill=metolachlor_sites)) +
   geom_boxplot(fill='cornflowerblue') +
@@ -109,20 +123,34 @@ tebuconazole_df <- data.frame(tebuconazole_dates, tebuconazole_sites, tebuconazo
 tebuconazole_df$tebuconazole_dates <- factor(tebuconazole_df$tebuconazole_dates, 
                                            levels = unique(tebuconazole_df$tebuconazole_dates))
 tebuconazole_df_nds <- tebuconazole_df[-tebuconazole_nds,]
+
+#sites as factor
+summary(tebuconazole_df)
+tebuconazole_df$tebuconazole_sites <- factor(tebuconazole_df$tebuconazole_sites)
+
 sorted_tebuconazole_df_nds <- tebuconazole_df_nds[order(tebuconazole_df_nds$tebuconazole_dates),]
 dim(sorted_tebuconazole_df_nds)
 sorted_tebuconazole_df <- tebuconazole_df[order(tebuconazole_df$tebuconazole_dates),]
 dim(sorted_tebuconazole_df)
 
+
+
 #sort data.frame on date in chron order
 unique(tebuconazole_dates)  
 tebuconazole_stacked <- ggplot(data=tebuconazole_df, aes(x=tebuconazole_dates, y=tebuconazole_concs, fill=tebuconazole_sites)) +
-  geom_bar(stat="identity", position="stack") +
-  scale_fill_grey(start=0.2,end=0.8) +
-  scale_fill_brewer(palette = "Set3") + 
+  geom_bar(stat="identity") +
+  scale_fill_manual(values=fill_palette) +
   theme_bw() + 
   labs(x = "Sample Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+tebuconazole_stacked
+
+#    geom_bar(stat="identity", position="stack") +
+#  scale_fill_grey(start=0.2,end=0.8) +
+#  scale_fill_brewer(palette = "Set3") + 
+#  theme_bw() + 
+#  labs(x = "Sample Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
+#  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 tebuconazole_boxplot <- ggplot(data=tebuconazole_df, aes(x=tebuconazole_dates, y=tebuconazole_concs, fill=tebuconazole_sites)) +
   geom_boxplot(fill='cornflowerblue') +
@@ -150,9 +178,37 @@ dev.off()
 #ggarrange(metolachlor_boxplot, tebuconazole_boxplot,labels=c("A","B"),ncol=1,nrows=2)
 #ggsave(compare_boxplot_nds,device="png",width=6,height=4)
 
-compare_stacked <- paste(stemflow.graphics,"glinski_fig3_met_teb_stacked.png",sep="")
+compare_stacked <- paste(stemflow.graphics,"glinski_fig3_met_teb_stacked_old.png",sep="")
 png(compare_stacked, width = 6, height = 6, units = "in",res=300)
-multiplot(metolachlor_stacked, tebuconazole_stacked, cols=1)
+  multiplot(metolachlor_stacked, tebuconazole_stacked, cols=1)
 dev.off()
 #ggarrange(metolachlor_stacked, tebuconazole_stacked,labels=c("A","B"),ncol=1,nrows=2)
 #ggsave(compare_stacked,device="png",width=6,height=4)
+
+#combine for final figure
+#metolachlor
+colnames(metolachlor_df) <- c("dates", "Sites", "concs")
+n <- length(metolachlor_df$dates)
+compound <- rep("Metolachlor", n)
+metolachlor_df2 <- cbind(metolachlor_df, compound)
+#tebuconazole
+colnames(tebuconazole_df) <- c("dates", "Sites", "concs")
+n <- length(tebuconazole_df$dates)
+compound <- rep("Tebuconazole", n)
+tebuconazole_df2 <- cbind(tebuconazole_df, compound)
+
+#combine
+combined_df <- rbind(metolachlor_df2, tebuconazole_df2)
+
+#final figure 3
+combined_stacked <- ggplot(data=combined_df, aes(x=dates, y=concs, fill=Sites)) +
+  geom_bar(stat="identity") +
+  facet_wrap(~compound, scales = "free", nrow = 2) +
+  scale_fill_manual(values=fill_palette) +
+  theme_bw() + 
+  labs(x = "Sample Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+jpeg(paste(stemflow.graphics,"glinski_fig3.jpg", sep=""),width = 5, height = 6, units = "in",res=600)
+  combined_stacked
+dev.off()

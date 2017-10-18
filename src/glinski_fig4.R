@@ -30,7 +30,7 @@ ponds_stacked <- ggplot(data=ponds_4l_df, aes(x=factor(ponds_dates), y=ponds_con
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ponds_stacked
 
-stacked_barplot <- paste(stemflow.graphics,"glinski_fig4_stacked_barplot.png",sep="")
-png(stacked_barplot, width = 7, height = 4, units = "in",res=300)
+stacked_barplot <- paste(stemflow.graphics,"glinski_fig4.jpg",sep="")
+jpeg(stacked_barplot, width = 7, height = 4, units = "in",res=600)
   ponds_stacked
 dev.off()
