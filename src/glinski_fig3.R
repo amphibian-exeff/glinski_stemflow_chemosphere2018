@@ -55,6 +55,19 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
   }
 }
 
+if(Sys.info()[4]=="DZ2626UTPURUCKE"){
+  stemflow.root <- "d:/git/glinski_stemflow/"
+}
+print(paste("Root directory location: ", stemflow.root, sep=""))
+
+stemflow.csv.in <- paste(stemflow.root, "csv_in/", sep="")
+stemflow.csv.out <- paste(stemflow.root, "csv_out/", sep="")
+stemflow.graphics <- paste(stemflow.root, "graphics/", sep="")
+stemflow.tables <- paste(stemflow.root, "tables/", sep="")
+
+#maybe ok even if remote drive returns false
+print(paste("check to see if R can access files OK: ", file.exists(stemflow.csv.in), sep = ""))
+
 #import tifton data
 tifton <- read.table(paste(stemflow.csv.in,"tifton2015.csv",sep=""), header = TRUE, sep = ",")
 
@@ -203,12 +216,14 @@ combined_df <- rbind(metolachlor_df2, tebuconazole_df2)
 #final figure 3
 combined_stacked <- ggplot(data=combined_df, aes(x=dates, y=concs, fill=Sites)) +
   geom_bar(stat="identity") +
-  facet_wrap(~compound, scales = "free", nrow = 2) +
+  facet_wrap(~ compound, scales = "free") + # , nrow = 2
   scale_fill_manual(values=fill_palette) +
   theme_bw() + 
   labs(x = "Sample Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+combined_stacked
 
+#write to jpeg
 jpeg(paste(stemflow.graphics,"glinski_fig3.jpg", sep=""),width = 5, height = 6, units = "in",res=600)
   combined_stacked
 dev.off()
