@@ -8,6 +8,7 @@ library(gridExtra)
 library(ggpubr)
 library(cowplot)
 library(RColorBrewer)
+library(plotly)
 
 # Multiple plot function
 #
@@ -214,14 +215,15 @@ tebuconazole_df2 <- cbind(tebuconazole_df, compound)
 combined_df <- rbind(metolachlor_df2, tebuconazole_df2)
 
 #final figure 3
-combined_stacked <- ggplot(data=combined_df, aes(x=dates, y=concs, fill=Sites)) +
-  geom_bar(stat="identity") +
-  facet_wrap(~ compound, scales = "free") + # , nrow = 2
+combined_stacked <- ggplot() +
+  geom_bar(data=combined_df, aes(x=dates, y=concs, fill=Sites),stat="identity",position='stack') +
+  facet_wrap(~ compound,scales = "free_y",nrow = 2,ncol=1) + # , nrow = 2
   scale_fill_manual(values=fill_palette) +
   theme_bw() + 
   labs(x = "Sample Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 combined_stacked
+# ggplotly(combined_stacked)
 
 #write to jpeg
 jpeg(paste(stemflow.graphics,"glinski_fig3.jpg", sep=""),width = 5, height = 6, units = "in",res=600)
