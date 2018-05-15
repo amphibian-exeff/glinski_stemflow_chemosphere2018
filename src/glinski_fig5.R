@@ -1,5 +1,19 @@
 library(ggplot2)
+library(ggpubr)
 
+#import tifton rainfall data
+tifton_rainfall <- read.table(paste(stemflow.csv.in,"rainwater_amount_updated.csv",sep=""), header = TRUE, sep = ",")
+dim(tifton_rainfall)
+summary(tifton_rainfall)
+colnames(tifton_rainfall)
+tifton_rainfall$date <- as.Date(tifton_rainfall$date,format="%m/%d/%Y")
+
+#barchart of rainfall data
+p1 <- ggplot(tifton_rainfall, aes(date, rain_inches)) +
+  geom_bar(stat="identity", na.rm = TRUE) +
+  xlab("Rainfall Date") + 
+  ylab("Precipitation (in)")
+p1
 #import tifton data
 tifton <- read.table(paste(stemflow.csv.in,"tifton2015.csv",sep=""), header = TRUE, sep = ",")
 dim(tifton)
@@ -34,15 +48,21 @@ tifton_compounds_plot$Date <- factor(tifton_compounds_plot$Date)
 sorted_tifton_compounds_plot <- tifton_compounds_plot[order(tifton_compounds_plot$Date),]
 
 #plot and save to file
-p <- ggplot(data=tifton_compounds_plot, aes(Date, Conc)) +
+p2 <- ggplot(data=tifton_compounds_plot, aes(Date, Conc)) +
   theme_bw() + 
   geom_point(aes(color=Type, shape=Site)) + 
-  facet_wrap(~Compound, scales = "free", nrow = 2) +
+  facet_wrap(~Compound, scales = "free_y", nrow = 2) +
   labs(x = "Sample Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1),legend.position="bottom")
+p2
 
-jpeg(paste(stemflow.graphics,"glinski_fig5.jpg", sep=""),width = 5, height = 6, units = "in",res=600)
-  p
+p3 <- ggarrange(p1, p2, heights = c(1, 2),
+          labels = c("A", "B"),
+          ncol = 1, nrow = 2)
+p3
+
+jpeg(paste(stemflow.graphics,"glinski_fig5.jpg", sep=""),width = 5, height = 8, units = "in",res=600)
+  p3
 dev.off()
 
 
