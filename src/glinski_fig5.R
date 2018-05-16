@@ -7,13 +7,18 @@ dim(tifton_rainfall)
 summary(tifton_rainfall)
 colnames(tifton_rainfall)
 tifton_rainfall$date <- as.Date(tifton_rainfall$date,format="%m/%d/%Y")
+typeof(as.Date(tifton_rainfall$date,format="%m/%d/%Y"))
 
 #barchart of rainfall data
 p1 <- ggplot(tifton_rainfall, aes(date, rain_inches)) +
+  theme_bw() +
   geom_bar(stat="identity", na.rm = TRUE) +
-  xlab("Rainfall Date") + 
-  ylab("Precipitation (in)")
+  ylab("Precipitation (in)") +
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank())
 p1
+
+
+#############
 #import tifton data
 tifton <- read.table(paste(stemflow.csv.in,"tifton2015.csv",sep=""), header = TRUE, sep = ",")
 dim(tifton)
@@ -44,7 +49,9 @@ tifton_compounds_plot$Site <- factor(tifton_compounds_plot$Site)
 
 #sort the dates
 tifton_compounds_plot$Date <- as.Date(tifton_compounds_plot$Date, "%m/%d/%Y")
-tifton_compounds_plot$Date <- factor(tifton_compounds_plot$Date)
+typeof(tifton_compounds_plot$Date)
+# tifton_compounds_plot$Date <- factor(tifton_compounds_plot$Date)
+# typeof(tifton_compounds_plot$Date)
 sorted_tifton_compounds_plot <- tifton_compounds_plot[order(tifton_compounds_plot$Date),]
 
 #plot and save to file
@@ -52,7 +59,7 @@ p2 <- ggplot(data=tifton_compounds_plot, aes(Date, Conc)) +
   theme_bw() + 
   geom_point(aes(color=Type, shape=Site)) + 
   facet_wrap(~Compound, scales = "free_y", nrow = 2) +
-  labs(x = "Sample Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
+  labs(x = "Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1),legend.position="bottom")
 p2
 
