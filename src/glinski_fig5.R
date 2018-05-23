@@ -1,5 +1,7 @@
 library(ggplot2)
 library(ggpubr)
+library(scales)
+
 
 #import tifton rainfall data
 tifton_rainfall <- read.table(paste(stemflow.csv.in,"rainwater_amount_updated.csv",sep=""), header = TRUE, sep = ",")
@@ -14,6 +16,9 @@ p1 <- ggplot(tifton_rainfall, aes(date, rain_inches)) +
   theme_bw() +
   geom_bar(stat="identity", na.rm = TRUE) +
   ylab("Precipitation (in)") +
+  scale_x_date(date_breaks = "2 month", 
+               labels=date_format("%b-%Y"),
+               limits = as.Date(c('2015-03-10','2016-01-18'))) +  
   theme(axis.title.x=element_blank(),axis.text.x=element_blank())
 p1
 
@@ -60,6 +65,9 @@ p2 <- ggplot(data=tifton_compounds_plot, aes(Date, Conc)) +
   geom_point(aes(color=Type, shape=Site)) + 
   facet_wrap(~Compound, scales = "free_y", nrow = 2) +
   labs(x = "Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
+  scale_x_date(date_breaks = "2 month", 
+               labels=date_format("%b-%Y"),
+               limits = as.Date(c('2015-03-15','2016-01-18'))) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1),legend.position="bottom")
 p2
 
