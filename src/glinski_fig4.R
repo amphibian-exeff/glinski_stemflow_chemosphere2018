@@ -32,11 +32,15 @@ ponds_stacked <- ggplot(data=ponds_4l_df, aes(x=factor(ponds_dates), y=ponds_con
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.4))
 ponds_stacked
 
+#Our transformation function
+scaleFUN <- function(x) sprintf("%.1f", x)
+
 metolachlor_stacked <- ggplot(data=ponds_4l_df[1:36,], aes(x=factor(ponds_dates[1:36]), y=ponds_concs[1:36], fill=ponds_factor[1:36])) +
 geom_bar(stat="identity") +
   facet_grid(~ponds_sites) +
   theme_bw() + 
   labs(x = "", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
+  scale_y_continuous(labels=scaleFUN) +
   guides(fill=guide_legend(title="Chemical")) + 
   theme(axis.title.x=element_blank(),axis.text.x=element_blank(),legend.position="top")
 metolachlor_stacked
@@ -46,7 +50,8 @@ others_stacked <- ggplot(data=ponds_4l_df[37:72,], aes(x=factor(ponds_dates), y=
   scale_fill_manual(values=c("skyblue3")) +
   facet_grid(~ponds_sites) +
   theme_bw() + 
-  labs(x = "Sample Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
+  labs(x = "Sample Month", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
+  scale_y_continuous(labels=scaleFUN) +
   guides(fill=guide_legend(title="Chemical")) + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.4),legend.position="top")
 others_stacked
