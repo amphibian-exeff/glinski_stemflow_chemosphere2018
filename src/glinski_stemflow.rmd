@@ -61,7 +61,7 @@ if(Sys.info()[4]=="DONNA-PC"){
   stemflow.root <- path.expand("C:/Users/Donna/Documents/Github/glinski_stemflow/")
 }
 
-if(Sys.info()[4]=="stp-air-3.local" || Sys.info()[4]=="stp-air.local" || Sys.info()[4]=="stp-air"){
+if(Sys.info()[4]=="stp-air-3.local" || Sys.info()[4]=="stp-air.local" || Sys.info()[4]=="stp-air" || Sys.info()[4]=="Toms-Air"){
   stemflow.root <- path.expand("~/git/glinski_stemflow/")
 }
 
@@ -111,6 +111,7 @@ summary(rainwater)
 unique(rainwater$Date)
 #chem_merge <- merge(chem_merge, rainwater, by="Date")
 ```
+
 
 wilcox stat testing
 ====================================

@@ -1,7 +1,7 @@
 #install of ggpubr currently a disaster
 if(!require(devtools)) install.packages("devtools")
-devtools::install_github("kassambara/ggpubr")
 
+library(ggpubr)
 library(plyr)
 library(ggplot2)
 library(gridExtra)
@@ -59,6 +59,9 @@ multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
 if(Sys.info()[4]=="DZ2626UTPURUCKE"){
   stemflow.root <- "d:/git/glinski_stemflow/"
 }
+if(Sys.info()[4]=="Toms-Air"){
+  stemflow.root <- path.expand("~/git/glinski_stemflow/")
+}                               
 print(paste("Root directory location: ", stemflow.root, sep=""))
 
 stemflow.csv.in <- paste(stemflow.root, "csv_in/", sep="")
@@ -170,11 +173,13 @@ tebuconazole_boxplot <- ggplot(data=tebuconazole_df, aes(x=tebuconazole_dates, y
   geom_boxplot(fill='cornflowerblue') +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+tebuconazole_boxplot
 
 tebuconazole_boxplot_nds <- ggplot(data=tebuconazole_df_nds, aes(x=tebuconazole_dates, y=tebuconazole_concs, fill=tebuconazole_sites)) +
   geom_boxplot(fill='cornflowerblue') +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+tebuconazole_boxplot_nds
 
 compare_boxplot <- paste(stemflow.graphics,"met_teb_boxplot.png",sep="")
 png(compare_boxplot, width = 4, height = 6, units = "in",res=300)
