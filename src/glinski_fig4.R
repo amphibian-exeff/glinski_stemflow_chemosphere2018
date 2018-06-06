@@ -36,21 +36,27 @@ metolachlor_stacked <- ggplot(data=ponds_4l_df[1:36,], aes(x=factor(ponds_dates[
 geom_bar(stat="identity") +
   facet_grid(~ponds_sites) +
   theme_bw() + 
-  labs(x = "Sample Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
+  labs(x = "", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
   guides(fill=guide_legend(title="Chemical")) + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.4))
+  theme(axis.title.x=element_blank(),axis.text.x=element_blank(),legend.position="top")
 metolachlor_stacked
 
-others_stacked <- ggplot(data=ponds_4l_df[37:72,], aes(x=factor(ponds_dates[37:72]), y=ponds_concs[37:72], fill=ponds_factor[37:72])) +
+others_stacked <- ggplot(data=ponds_4l_df[37:72,], aes(x=factor(ponds_dates), y=ponds_concs, fill=ponds_factor)) +
   geom_bar(stat="identity") +
+  scale_fill_manual(values=c("skyblue3")) +
   facet_grid(~ponds_sites) +
   theme_bw() + 
   labs(x = "Sample Date", y=expression(paste("Concentration (",mu,"g/L)",sep=""))) +
   guides(fill=guide_legend(title="Chemical")) + 
-  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.4))
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.4),legend.position="top")
 others_stacked
 
+figure_stacked <- ggarrange(metolachlor_stacked, others_stacked, heights = c(2.68, 3.32),
+                labels = c("A", "B"),
+                ncol = 1, nrow = 2)
+figure_stacked
+
 stacked_barplot <- paste(stemflow.graphics,"glinski_fig4.jpg",sep="")
-jpeg(stacked_barplot, width = 7, height = 4, units = "in",res=600)
-  ponds_stacked
+jpeg(stacked_barplot, width = 7, height = 6, units = "in",res=600)
+figure_stacked
 dev.off()
